@@ -12,11 +12,6 @@ interface Request {
   category: string;
 }
 
-interface Balance {
-  income: number;
-  outcome: number;
-  total: number;
-}
 
 class CreateTransactionService {
   public async execute({
@@ -35,7 +30,7 @@ class CreateTransactionService {
     const { total } = await transactionsRepository.getBalance();
 
     if (type === 'outcome' && value > total) {
-      throw new AppError('Insufficient funds.', 400 );
+      throw new AppError('Insufficient funds.', 400);
     }
 
     const categoriesRepository = getRepository(Category);
