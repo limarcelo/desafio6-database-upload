@@ -10,7 +10,7 @@ interface Request {
 
 
 class DeleteTransactionService {
-  public async execute({ id }: Request): Promise<void> {
+  public async execute(id: string): Promise<void> {
 
     const transactionsRepository = getCustomRepository(TransactionsRepository);
     const transaction = await transactionsRepository.findOne({

@@ -37,12 +37,6 @@ class TransactionsRepository extends Repository<Transaction> {
     return balance;
   }
 
-  public async removeAll(): Promise<void>{
-    this.query('delete from transactions');
-    console.log('Delete complete!');
-  }
-
-
 }
 
 export default TransactionsRepository;

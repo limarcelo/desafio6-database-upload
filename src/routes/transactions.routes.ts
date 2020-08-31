@@ -1,13 +1,17 @@
 import { Router } from 'express';
-import { getCustomRepository } from 'typeorm';
-
 
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import CreateTransactionService from '../services/CreateTransactionService';
 import DeleteTransactionService from '../services/DeleteTransactionService';
 import ImportTransactionsService from '../services/ImportTransactionsService';
 
+import multer from 'multer';
+import { getCustomRepository } from 'typeorm';
+import uploadConfig from '../config/upload'
+import AppError from '../errors/AppError';
+
 const transactionsRouter = Router();
+const upload = multer(uploadConfig);
 
 transactionsRouter.get('/', async (request, response) => {
 
@@ -15,7 +19,7 @@ transactionsRouter.get('/', async (request, response) => {
   const transactions = await transactionRepository.find();
   const balance = await transactionRepository.getBalance();
 
-  return response.json({totalTransactions: transactions.length, transactions, balance });
+  return response.json({transactions, balance });
 });
 
 transactionsRouter.post('/', async (request, response) => {
@@ -29,7 +33,7 @@ transactionsRouter.post('/', async (request, response) => {
     value,
   });
 
-  return response.json(transaction);
+  return response.status(200).json(transaction);
 });
 
 transactionsRouter.delete('/:id', async (request, response) => {
@@ -37,17 +41,19 @@ transactionsRouter.delete('/:id', async (request, response) => {
   const { id } = request.params;
 
   const deleteTransactionService = new DeleteTransactionService();
-  deleteTransactionService.execute({ id });
+
+  await deleteTransactionService.execute(id);
 
   return response.status(204).send();
-
 });
 
-transactionsRouter.post('/import', async (request, response) => {
+transactionsRouter.post('/import', upload.single('file'), async (request, response) => {
 
   const importTransactionService = new ImportTransactionsService();
 
-  const transactions = importTransactionService.execute();
+  const transactions = await importTransactionService.execute({
+    fileName: request.file.filename,
+  });
 
   return response.status(200).json(transactions);
 });
